@@ -1,0 +1,27 @@
+Code	Libelle	Taille	Unite	Nb
+T	Taille standard	46	mm	26
+T	Taille standard	47	mm	26
+T	Taille standard	48	mm	26
+T	Taille standard	49	mm	26
+T	Taille standard	50	mm	26
+T	Taille standard	51	mm	26
+T	Taille standard	52	mm	26
+T	Taille standard	53	mm	26
+T	Taille standard	54	mm	26
+T	Taille standard	55	mm	26
+T	Taille standard	56	mm	26
+T	Taille standard	57	mm	26
+T	Taille standard	58	mm	26
+T	Taille standard	59	mm	26
+T	Taille standard	60	mm	26
+T	Taille standard	61	mm	26
+T	Taille standard	62	mm	26
+T	Taille standard	63	mm	26
+T	Taille standard	64	mm	26
+T	Taille standard	65	mm	26
+T	Taille standard	66	mm	26
+T	Taille standard	67	mm	26
+T	Taille standard	68	mm	26
+T	Taille standard	69	mm	26
+T	Taille standard	70	mm	26
+T	Taille standard	71	mm	26

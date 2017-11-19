@@ -1,0 +1,66 @@
+code	libelle	taille
+		
+1	100.BAGUES	T
+11	101.Solitaires	T
+13	103.Solitaires accompagnés	T
+15	104.Alliances diamants	T
+17	106.Alliance or et argent	T
+19	108.Alliances pierres précieuses	T
+1A	110.Bagues diamants	T
+1C	112.Bagues pierres précieuses	T
+1E	114.Bagues or et argent	T
+1G	116.Bagues perle	T
+1I	118.bagues perle et diamant	T
+1K	120.Bagues de pied	T
+1M	122.bagues tiki	T
+1O	124.Chevalière	T
+2	200.PENDENTIFS	
+21	201.Pendentifs diamants	
+23	203.Pendentifs pierres precieuses	
+25	205.Pendentifs or et argent	
+27	207.Pendentifs perle	
+29	209.Pendentifs perle et diamants	
+2A	211.Pendentif animaux	
+2C	213.Pendentifs Origami	
+2E	215.Pendentif Religieux	
+2G	217.Pendentifs carte du caillou et des iles	
+2I	219.Pendentifs Tiki	
+2K	221.Pendentifs flèche faitière	
+3	300.BOUCLES D'OREILLES	
+31	301.Boucles d'oreilles diamants	
+33	303.Boucles d'oreilles pierres précieuses	
+35	305.Boucles d'oreilles or et argent	
+37	307.Boucles d'oreilles perle	
+39	309.Boucles d'oreilles perle et diamants	
+4	400.BRACELETS	
+41	401.Bracelets diamants	
+43	403.Bracelets pierres précieuses	
+45	405.Bracelets or et argent	
+47	407.Bracelets menottes	
+49	409.Bracelets manchette	
+4A	411.Bracelets perle	
+4C	413.Bracelets perle et diamants	
+4E	415.Bracelets gourmette identité	
+4H	418.Bracelets câble	
+5	500.MONTRES	
+51	501.Montres homme	
+52	502.Montres femme	
+53	503.Montres enfant	
+6	600.COLLIERS	
+61	601.colliers diamants	
+63	603.Colliers pierres précieuses	
+65	605.Colliers or et argent	
+67	607.Colliers perle et diamants	
+69	609.Colliers perle	
+6B	612.Colliers prénom	
+7	700.DIAMANTS	
+71	701.Diamants	
+73	703.Pierres Précieuses et fines	
+75	705.Perles de Tahiti	
+76	706.Perles de chine	
+8	800.ACCESSOIRES	
+81	801.Charms	
+83	803.Piercing	
+84	804.Cuir	
+85	805.Puces de nez	
+[FIN]
