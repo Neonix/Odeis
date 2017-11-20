@@ -196,6 +196,7 @@ catch (PrestaShopWebserviceException $e)
 	if ($trace[0]['args'][0] == 404) echo 'Bad ID';
 	else if ($trace[0]['args'][0] == 401) echo 'Bad auth key';
 	else echo 'Other error<br />'.$e->getMessage();
+	die();
 }
 
 
@@ -252,7 +253,7 @@ foreach ($files['famweb'] as $Akey => $famweb)
 	{
 		if(LEVEL && !isset($read2))
 		{
-			echo "/! PAS DE TRAITEMENT DATTRIBUES ATM\n\r";
+			echo "/! PAS DE TRAITEMENT DATTRIBUS ATM\n\r";
 			$read2 = true;
 		}
 	}
@@ -287,6 +288,7 @@ foreach ($files['articles'] as $Akey => $articles)
 			$product = make_product($articles);
 			$correspondance['articles'][$articles[14]] = $product->id; //Association ID presta 
 			file_put_contents(PATH . "articles/rapprochement.txt", json_encode($correspondance)); //On enregistre
+
 			add_image($product->id, $articles); //On ajoute l'image associé
 
 			if( isset($files['articles'][$Akey]['dispo']) ) //On regarde si on à une dispo 
@@ -316,7 +318,16 @@ foreach ($files['articles'] as $Akey => $articles)
 			if($articles[15] == 'S')
 			{
 				if(isset($correspondance['articles'][$articles[14]][0]))
+				{
+
 					del_product($correspondance['articles'][$articles[14]][0]);
+					
+					unset($correspondance['articles'][$articles[14]]);
+					unset($correspondance['stock'][$articles[14]]);
+
+					file_put_contents(PATH . "articles/rapprochement.txt", json_encode($correspondance)); //On enregistre
+
+				}
 				else
 					echo "/! ARTICLE A DELETE MAIS 0 CORRESPONDANCE \n\r";
 			}
@@ -393,10 +404,6 @@ function make_categorie($data, $parent = 2) {
 				 '%27' => '',
 
 				));
-
-
-	var_dump($url);
-
 
 	try {
 		$xml 													= $webService->get(array('url' => PS_SHOP_PATH.'/api/categories?schema=blank'));
@@ -553,6 +560,10 @@ function make_product($data){
 
 function add_image($id, $data)
 {
+
+	if(!file_exists(PATH . 'photos/' . $data[2]))
+		echo PATH . "photos/" . $data[2] . "not found \n\r";
+
 	if(@isset($id)) {
 		$cfile = new CURLFile(PATH . 'photos/' . $data[2], 'image/jpg', $data[2]);
 		$ch = curl_init();
