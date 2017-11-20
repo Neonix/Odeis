@@ -31,7 +31,7 @@ define('LEVEL', 3);
 define('PS_SHOP_PATH', 'http://localhost'); 
 
 define('PS_WS_AUTH_KEY', 'TMAY3ILMIEYPE3TSF6L8Z6UVMBZ1T5PU');
-define('PATH', '../FTP/');
+define('PATH', 'FTP/');
 define('FIN', '[FIN]');
 
 
@@ -137,6 +137,8 @@ $correspondance = json_decode($recoveredData, true);
 //	CREATION DU TABLEAU VIDE SI FIRST TIME
 if(!isset($correspondance))
 	$correspondance = array();
+file_put_contents(PATH . "articles/rapprochement.txt", json_encode($correspondance));
+
 
 // CHARGEMENT DE TOUS LES FICHIERS
 foreach ($files as $key => $value)
@@ -176,6 +178,9 @@ foreach ($files['articles'] as $Akey => $article)
 				//TODO TRAINTEMENT UNIQUE !!
 				//var_dump($files['articles'][$Akey]);
 				//die('unique');
+
+				if(LEVEL)
+					echo "traitement articles unique\n\r";
 			}
 
 
@@ -220,11 +225,30 @@ foreach ($files['famweb'] as $Akey => $famweb)
 
 		if( empty($correspondance['categories'][$famweb[0]]) )
 		{
-			
 
-			$category_id = make_categorie($famweb);
+
+			//Si le chiffre avant le . du libelle de la Famweb.txt est modulo 100 alors c'est une catégorie -_-"
+			//1	100.BAGUES	T -> 100 est100
+			if(( (int) (explode('.', $famweb[1], 2)[0]) % 100) == 0) 
+			{
+				//Si c'est une catégorie
+				$id_parent	= 2; //Accueil
+				
+			}
+			else 
+			{
+
+				//11	101.Solitaires	T  -> 101 : categorie 1
+				//Marche que jusqu'a 9 :s
+				$first_chiffre = explode('.', $famweb[1], 2)[0][0];
+				$id_parent = (int) $correspondance['categories'][$first_chiffre][0];
+			}
+
+
+			$category_id = make_categorie($famweb, $id_parent);
 			$correspondance['categories'][$famweb[0]] = $category_id;
 			file_put_contents(PATH . "articles/rapprochement.txt", json_encode($correspondance));
+
 		}
 		else
 			if(LEVEL)
@@ -235,12 +259,13 @@ foreach ($files['famweb'] as $Akey => $famweb)
 	if($famweb[2] != null )
 	{
 		if(LEVEL)
-			echo 'traitement attributs a faire';
+			echo "traitement attributs a faire\n\r";
 	}
 }
 
 
 
+die();
 
 
 $i = 0;
@@ -317,7 +342,7 @@ if(LEVEL)
 $time_end = microtime(true);
 $time = $time_end - $time_start;
 if(LEVEL)
-	echo "Temps de traitement $time secondes\n";
+	echo "Temps de traitement $time secondes\n\r";
 
 
 
@@ -340,8 +365,34 @@ if(LEVEL)
 
 
 
-function make_categorie($data) {
+function make_categorie($data, $parent = 2) {
 	global $webService;
+
+	$url =  rawurlencode(explode('.', $data[1], 2)[1]) ;
+	$url = strtr($url, array (
+				 '%20' => '-',
+
+				 '%C8' => 'e',
+				 '%C9' => 'e',
+
+				 '%E0' => 'a',
+				 '%E1' => 'a',
+				 '%E2' => 'a',
+				 
+				 '%E8' => 'e',
+				 '%E9' => 'e',
+				 '%EA' => 'e',
+
+				 '%C0' => 'a',
+				 '%C1' => 'a',
+
+				 '%27' => '',
+
+				));
+
+
+	var_dump($url);
+
 
 	try {
 		$xml 													= $webService->get(array('url' => PS_SHOP_PATH.'/api/categories?schema=blank'));
@@ -351,15 +402,15 @@ function make_categorie($data) {
 		$categories->name->language[0][0]['id'] = 1;
 		$categories->name->language[0][0]['xlink:href'] 		= PS_SHOP_PATH . '/api/languages/' . 1;
 
-		$categories->link_rewrite->language[0][0] 				= "ma-categorie";
+		$categories->link_rewrite->language[0][0] 				= $url;
 		$categories->link_rewrite->language[0][0]['id'] 		= 1;
 		$categories->link_rewrite->language[0][0]['xlink:href'] = PS_SHOP_PATH . '/api/languages/' . 1;
 
-		$categories->description->language[0][0] 				= utf8_encode($data[1]);
+		$categories->description->language[0][0] 				= utf8_encode(explode('.', $data[1], 2)[1]);
 		$categories->description->language[0][0]['id'] 			= 1;
 		$categories->description->language[0][0]['xlink:href'] 	= PS_SHOP_PATH . '/api/languages/' . 1;
 
-		$categories->id_parent 									= 2; //Accueil
+		$categories->id_parent 									= $parent; //Accueil
 		$categories->active 									= 1;
 
 		$opt													= array('resource' => 'categories');
@@ -683,7 +734,14 @@ global $webService;
 
 }
 
+  function enleveaccents(&$chaine)
+    {
+     $chaine= strtr($chaine,
+   		" éÀÁÂÃÄÅàáâãäåÒÓÔÕÖØòóôõöøÈÉÊËèéêëÇçÌÍÎÏìíîïÙÚÛÜùúûüÿÑñ",
+   		"-eaaaaaaaaaaaaooooooooooooeeeeeeeecciiiiiiiiuuuuuuuuynn");
+    } 
 
+ 
 
 
 
