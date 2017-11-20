@@ -110,9 +110,15 @@ class dispo {
 foreach ($files as $Akey => $value)
 {
 	if (!file_exists(PATH . $value)) {
-	    echo "Le fichier $value n'existe pas.";
+	    echo "Le fichier $value n'existe pas.\n\r";
 	      die();
 	}
+}
+
+// VERIFICATION DE LURL API
+if(! @get_headers(PS_SHOP_PATH) || @get_headers(PS_SHOP_PATH)[0] == 'HTTP/1.1 404 Not Found') {
+    echo PS_SHOP_PATH . " API URL not found.\n\r";
+	die();
 }
 
 
