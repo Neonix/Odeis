@@ -26,33 +26,18 @@ la quantité est calculée sur la référence fournisseur
 
 set_time_limit(0);
 
-define('DEBUG', false);
-define('LEVEL', 3);
-define('PS_SHOP_PATH', 'http://localhost'); 
-
-define('PS_WS_AUTH_KEY', 'TMAY3ILMIEYPE3TSF6L8Z6UVMBZ1T5PU');
-define('PATH', 'FTP/');
-
 define('FIN', '[FIN]');
 
 
 $i 				= 0;
 $time_start 	= microtime(true);
-$files 			= array( 
-					"articles" 		=> "articles/articles.txt",
-					"attributs" 	=> "articles/attributs.txt",
-					"code_attribut" => "articles/code_attribut.txt",
-					"dispo" 		=> "articles/dispo.txt",
-					"famweb" 		=> "articles/famweb.txt",
-					"markweb" 		=> "articles/markweb.txt",
-					"photos" 		=> "articles/photos.txt",
-				);
+
 
 header('Content-Type: text/html; charset=iso-8859-1');
 
 require_once('./class/PSWebServiceLibrary.php');
 require_once('./class/CsvImporter.php');
-
+require_once('./config/config.php');
 
 
 
@@ -180,8 +165,10 @@ foreach ($files['articles'] as $Akey => $article)
 				//var_dump($files['articles'][$Akey]);
 				//die('unique');
 
-				if(LEVEL)
-					echo "traitement articles unique\n\r";
+				if(LEVEL && !isset($read1)) {
+					echo "/! PAS DE TRAITEMENT POUR ARTICLE UNIQUE ATM\n\r";
+					$read1 = true;
+				}
 			}
 
 
@@ -253,18 +240,31 @@ foreach ($files['famweb'] as $Akey => $famweb)
 		}
 		else
 			if(LEVEL)
-				echo $correspondance['categories'][$famweb[0]][0] . " Categorie exist \n\r";
+			{
+				if(!isset($category_exist))
+					$category_exist=0;
+				$category_exist++;
+			}
 	}
 
 
 	if($famweb[2] != null )
 	{
-		if(LEVEL)
-			echo "traitement attributs a faire\n\r";
+		if(LEVEL && !isset($read2))
+		{
+			echo "/! PAS DE TRAITEMENT DATTRIBUES ATM\n\r";
+			$read2 = true;
+		}
 	}
 }
 
-
+if(LEVEL)
+{
+	if(isset($category_exist))
+		echo $category_exist . " CATEGORIES NON INJECTE CAR PRESENTE\n\r";
+	else
+		echo "Toutes les categories ont etaient injectees\n\r";
+}
 
 
 
@@ -323,7 +323,9 @@ foreach ($files['articles'] as $Akey => $articles)
 
 			if(LEVEL)
 			{
-				echo $correspondance['articles'][$articles[14]][0] . " Article exist \n\r";
+				if(!isset($article_exist))
+					$article_exist=0;
+				$article_exist++;
 			}
 		}
 		
@@ -333,7 +335,7 @@ foreach ($files['articles'] as $Akey => $articles)
 
 }
 if(LEVEL)
-	echo " ".$i." articles \n\r";
+	echo " ".$article_exist." ARTICLES NON INJECTE CAR PRESENTE \n\r";
 
 
 
