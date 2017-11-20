@@ -26,12 +26,13 @@ la quantité est calculée sur la référence fournisseur
 
 set_time_limit(0);
 
-define('DEBUG', true);
+define('DEBUG', false);
 define('LEVEL', 3);
 define('PS_SHOP_PATH', 'http://localhost'); 
 
 define('PS_WS_AUTH_KEY', 'TMAY3ILMIEYPE3TSF6L8Z6UVMBZ1T5PU');
 define('PATH', 'FTP/');
+
 define('FIN', '[FIN]');
 
 
@@ -49,8 +50,8 @@ $files 			= array(
 
 header('Content-Type: text/html; charset=iso-8859-1');
 
-require_once('./PSWebServiceLibrary.php');
-require_once('./CsvImporter.php');
+require_once('./class/PSWebServiceLibrary.php');
+require_once('./class/CsvImporter.php');
 
 
 
@@ -265,7 +266,7 @@ foreach ($files['famweb'] as $Akey => $famweb)
 
 
 
-die();
+
 
 
 $i = 0;
@@ -314,9 +315,10 @@ foreach ($files['articles'] as $Akey => $articles)
 		{
 			if($articles[15] == 'S')
 			{
-				del_product($correspondance['articles'][$articles[14]][0]);
-				//TODO A DELETE
-				//echo $correspondance['articles'][$articles[14]][0] . " A DELETE \n\r";
+				if(isset($correspondance['articles'][$articles[14]][0]))
+					del_product($correspondance['articles'][$articles[14]][0]);
+				else
+					echo "/! ARTICLE A DELETE MAIS 0 CORRESPONDANCE \n\r";
 			}
 
 			if(LEVEL)
@@ -378,7 +380,7 @@ function make_categorie($data, $parent = 2) {
 				 '%E0' => 'a',
 				 '%E1' => 'a',
 				 '%E2' => 'a',
-				 
+
 				 '%E8' => 'e',
 				 '%E9' => 'e',
 				 '%EA' => 'e',
@@ -733,16 +735,6 @@ global $webService;
 	return $combination;
 
 }
-
-  function enleveaccents(&$chaine)
-    {
-     $chaine= strtr($chaine,
-   		" éÀÁÂÃÄÅàáâãäåÒÓÔÕÖØòóôõöøÈÉÊËèéêëÇçÌÍÎÏìíîïÙÚÛÜùúûüÿÑñ",
-   		"-eaaaaaaaaaaaaooooooooooooeeeeeeeecciiiiiiiiuuuuuuuuynn");
-    } 
-
- 
-
 
 
 ?>
