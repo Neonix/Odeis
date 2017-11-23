@@ -114,22 +114,21 @@ foreach ($files as $Akey => $value)
 	      die();
 	}
 }
-
 // VERIFICATION DE LURL API
 if(! @get_headers(PS_SHOP_PATH) || @get_headers(PS_SHOP_PATH)[0] == 'HTTP/1.1 404 Not Found') {
     echo PS_SHOP_PATH . " API URL not found.\n\r";
 	die();
 }
-
-
 //	FICHIER DE CORRESPONDANCE ID ODEIS ET PRESTASHOP
 if($recoveredData = file_get_contents(PATH . "articles/rapprochement.txt"))
 $correspondance = json_decode($recoveredData, true);
-
 //	CREATION DU TABLEAU VIDE SI FIRST TIME
 if(!isset($correspondance))
 	$correspondance = array();
 file_put_contents(PATH . "articles/rapprochement.txt", json_encode($correspondance));
+
+
+
 
 
 // CHARGEMENT DE TOUS LES FICHIERS
@@ -144,6 +143,8 @@ foreach ($files as $key => $value)
             var_dump($e->getMessage());
         }
 }
+
+
 
 
 
@@ -206,6 +207,9 @@ catch (PrestaShopWebserviceException $e)
 }
 
 
+
+
+
 // INSERTION DES ATTRIBUTS
 foreach ($files['code_attribut'] as $Ckey => $code_attribut)
 {
@@ -221,7 +225,7 @@ foreach ($files['code_attribut'] as $Ckey => $code_attribut)
 			$xml = add_product_options($code_attribut);
 			(int) $id_category_attribut = $xml->id;
 			
-			$correspondance['code_attribut'][$code_attribut[0]] = (int) $xml->id;
+			$correspondance['code_attribut'][$code_attribut[0]] = $id_category_attribut;
 			file_put_contents(PATH . "articles/rapprochement.txt", json_encode($correspondance));
 		
 
@@ -231,7 +235,8 @@ foreach ($files['code_attribut'] as $Ckey => $code_attribut)
 				{
 					
 					$xml = add_product_option_values($attributs, $id_category_attribut);
-
+					$correspondance['attributs'][$attributs[2]] = (int) $xml->id;
+					file_put_contents(PATH . "articles/rapprochement.txt", json_encode($correspondance));
 				}
 			}
 		}
@@ -241,6 +246,8 @@ foreach ($files['code_attribut'] as $Ckey => $code_attribut)
 	}
 
 }
+
+
 
 
 
@@ -311,6 +318,7 @@ if(LEVEL)
 
 
 
+
 $i = 0;
 // INSERTION EN MASSE DES ARTICLES ET DISPO ARTICLES
 foreach ($files['articles'] as $Akey => $articles)
@@ -332,6 +340,8 @@ foreach ($files['articles'] as $Akey => $articles)
 
 			add_image($product->id, $articles); //On ajoute l'image associé
 
+			//var_dump($product);
+
 			if( isset($files['articles'][$Akey]['dispo']) ) //On regarde si on à une dispo 
 			{		
 				//On ajout les stocks
@@ -350,6 +360,7 @@ foreach ($files['articles'] as $Akey => $articles)
 			{	
 				echo $files['articles'][$Akey][3] . " 0 dispo \n\r";
 			}
+			//die();
 
 
 			
@@ -561,8 +572,9 @@ function make_product($data){
 		
 		$opt                                                        = array('resource' => 'products');
 		$opt['postXml']                                             = $xml->asXML();
-		//sleep(1);
+		sleep(1);
 		$xml                                                        = $webService->add($opt); 
+
 		return $xml->product;
 /*
 
@@ -645,6 +657,7 @@ function set_product_quantity($quantity, $ProductId, $StokId, $AttributeId){
 		$opt['putXml']                   = $xml->asXML();
 		$opt['id']                       = $StokId;
 		$xml                             = $webService->edit($opt);
+		sleep(1);
 		return $xml->stock_available;
 	}
 	catch (PrestaShopWebserviceException $ex) {
@@ -771,8 +784,8 @@ global $webService;
 		$opt['postXml']                                                 = $xml->asXML();
 		//sleep(1);
 		$xml                                                            = $webService->add($opt); 
-		$product_options                                                = $xml->product_options;
-		return $product_options;
+		$product_option_value                                           = $xml->product_option_value;
+		return $product_option_value;
 	}
 	catch (PrestaShopWebserviceException $ex) {
 		// Here we are dealing with errors
