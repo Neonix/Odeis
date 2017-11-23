@@ -242,7 +242,7 @@ foreach ($files['code_attribut'] as $Ckey => $code_attribut)
 
 }
 
-die();
+
 
 // INSERTION EN MASSE DES CATEGORIES
 foreach ($files['famweb'] as $Akey => $famweb)
@@ -276,7 +276,7 @@ foreach ($files['famweb'] as $Akey => $famweb)
 
 
 			$category_id = make_categorie($famweb, $id_parent);
-			$correspondance['categories'][$famweb[0]] = $category_id;
+			$correspondance['categories'][$famweb[0]] = (int) $category_id;
 			file_put_contents(PATH . "articles/rapprochement.txt", json_encode($correspondance));
 
 		}
@@ -309,7 +309,7 @@ if(LEVEL)
 }
 
 
-die();
+
 
 $i = 0;
 // INSERTION EN MASSE DES ARTICLES ET DISPO ARTICLES
@@ -327,7 +327,7 @@ foreach ($files['articles'] as $Akey => $articles)
 			
 
 			$product = make_product($articles);
-			$correspondance['articles'][$articles[14]] = $product->id; //Association ID presta 
+			$correspondance['articles'][$articles[14]] = (int) $product->id; //Association ID presta 
 			file_put_contents(PATH . "articles/rapprochement.txt", json_encode($correspondance)); //On enregistre
 
 			add_image($product->id, $articles); //On ajoute l'image associé
@@ -358,10 +358,10 @@ foreach ($files['articles'] as $Akey => $articles)
 		{
 			if($articles[15] == 'S')
 			{
-				if(isset($correspondance['articles'][$articles[14]][0]))
+				if(isset($correspondance['articles'][$articles[14]]))
 				{
 
-					del_product($correspondance['articles'][$articles[14]][0]);
+					del_product($correspondance['articles'][$articles[14]]);
 					
 					unset($correspondance['articles'][$articles[14]]);
 					unset($correspondance['stock'][$articles[14]]);
@@ -551,9 +551,9 @@ function make_product($data){
 		
 		$product->associations->categories
 			->addChild('category')
-			->addChild('id', $correspondance['categories'][$data[0]][0]);
+			->addChild('id', $correspondance['categories'][$data[0]]);
 
-		$product->id_category_default								= $correspondance['categories'][$data[0]][0];
+		$product->id_category_default								= $correspondance['categories'][$data[0]];
 		
 		
 		$product->unit_price_ratio 									= (int) $data[9];
@@ -561,11 +561,9 @@ function make_product($data){
 		
 		$opt                                                        = array('resource' => 'products');
 		$opt['postXml']                                             = $xml->asXML();
-		sleep(1);
+		//sleep(1);
 		$xml                                                        = $webService->add($opt); 
-		
-		$product                                                    = $xml->product;
-
+		return $xml->product;
 /*
 
 	//Association avec notre catégorie créée auparavant
@@ -593,7 +591,7 @@ function make_product($data){
 	}
 
 	
-	return $product;
+
 }
 
 
@@ -647,8 +645,7 @@ function set_product_quantity($quantity, $ProductId, $StokId, $AttributeId){
 		$opt['putXml']                   = $xml->asXML();
 		$opt['id']                       = $StokId;
 		$xml                             = $webService->edit($opt);
-
-		return $xml;
+		return $xml->stock_available;
 	}
 	catch (PrestaShopWebserviceException $ex) {
 		// Here we are dealing with errors
@@ -680,7 +677,7 @@ function add_combination($data){
 		
 		$opt                                                                            = array('resource' => 'combinations');
 		$opt['postXml']                                                                 = $xml->asXML();
-		sleep(1);
+		//sleep(1);
 		$combination																	= $webService->add($opt); 
 		return $combination;
 	}
@@ -767,7 +764,7 @@ global $webService;
 		$product_option_values->color                                   = 'select';
 		$product_option_values->position                                = 1;
 
-		$product_option_values->name->language[0][0]                    = $data[2] . " " . $data[3];
+		$product_option_values->name->language[0][0]                    = $data[2];
 		$product_option_values->name->language[0][0]['id']              = 1;
 		$product_option_values->name->language[0][0]['xlink:href'] 		= PS_SHOP_PATH . '/api/languages/' . 1;
 		$opt 															= array('resource' => 'product_option_values');
