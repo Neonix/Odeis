@@ -206,8 +206,43 @@ catch (PrestaShopWebserviceException $e)
 }
 
 
+// INSERTION DES ATTRIBUTS
+foreach ($files['code_attribut'] as $Ckey => $code_attribut)
+{
+	if($code_attribut[0] == FIN) // MARQUEUR DE FIN
+		break;
+
+	if($code_attribut[0] != "") //On ignore premiere ligne vide ou les lignes vides
+	{
 
 
+		if( empty($correspondance['code_attribut'][$code_attribut[0]]) )
+		{
+			$xml = add_product_options($code_attribut);
+			(int) $id_category_attribut = $xml->id;
+			
+			$correspondance['code_attribut'][$code_attribut[0]] = (int) $xml->id;
+			file_put_contents(PATH . "articles/rapprochement.txt", json_encode($correspondance));
+		
+
+			foreach ($files['attributs'] as $Akey => $attributs)
+			{
+				if($attributs[0] == $code_attribut[0])
+				{
+					
+					$xml = add_product_option_values($attributs, $id_category_attribut);
+
+				}
+			}
+		}
+
+		
+
+	}
+
+}
+
+die();
 
 // INSERTION EN MASSE DES CATEGORIES
 foreach ($files['famweb'] as $Akey => $famweb)
@@ -274,7 +309,7 @@ if(LEVEL)
 }
 
 
-
+die();
 
 $i = 0;
 // INSERTION EN MASSE DES ARTICLES ET DISPO ARTICLES
@@ -621,6 +656,7 @@ function set_product_quantity($quantity, $ProductId, $StokId, $AttributeId){
 		if ($trace[0]['args'][0] == 404) echo 'Bad ID';
 		else if ($trace[0]['args'][0] == 401) echo 'Bad auth key';
 		else echo 'Other error<br />'.$ex->getMessage();
+		return;
 	}
 }
 
@@ -645,8 +681,8 @@ function add_combination($data){
 		$opt                                                                            = array('resource' => 'combinations');
 		$opt['postXml']                                                                 = $xml->asXML();
 		sleep(1);
-		$xml                                                                            = $webService->add($opt); 
-		$combination                                                                    = $xml->combination;
+		$combination																	= $webService->add($opt); 
+		return $combination;
 	}
 	catch (PrestaShopWebserviceException $ex) {
 		// Here we are dealing with errors
@@ -655,8 +691,6 @@ function add_combination($data){
 		else if ($trace[0]['args'][0] == 401) echo 'Bad auth key';
 		else echo 'Other error<br />'.$ex->getMessage();
 	}
-	//insert stock
-	return $combination;
 }
 
 
@@ -667,26 +701,26 @@ function add_product_options($data){
 	try{
 		$xml                                              = $webService->get(array('url' => PS_SHOP_PATH.'/api/product_options?schema=blank'));
 		
-		$product_options                                                                    = $xml->children()->children();
-		$product_options->is_color_group													= 0;
-		$product_options->group_type                                                        = 'select';
-		$product_options->position                                                        	= 1;
+		$product_options                                                            = $xml->children()->children();
+		$product_options->is_color_group											= 0;
+		$product_options->group_type                                                = 'select';
+		$product_options->position                                                  = 1;
 
-		$product_options->name->language[0][0]                           					= 'Size';
-		$product_options->name->language[0][0]['id']                     					= 1;
-		$product_options->name->language[0][0]['xlink:href'] 								= PS_SHOP_PATH . '/api/languages/' . 1;
+		$product_options->name->language[0][0]                           			= $data[1];
+		$product_options->name->language[0][0]['id']                     			= 1;
+		$product_options->name->language[0][0]['xlink:href'] 						= PS_SHOP_PATH . '/api/languages/' . 1;
 
-		$product_options->name->public_name[0][0]                           				= 'Taille';
-		$product_options->name->public_name[0][0]['id']                     				= 1;
-		$product_options->name->public_name[0][0]['xlink:href'] 			 				= PS_SHOP_PATH . '/api/languages/' . 1;
+		$product_options->public_name->language[0][0]                           	= $data[1];
+		$product_options->public_name->language[0][0]['id']                     	= 1;
+		$product_options->public_name->language[0][0]['xlink:href'] 			 	= PS_SHOP_PATH . '/api/languages/' . 1;
 
-		$product_options->associations->product_option_values 								= 1;
+		//$product_options->associations->product_option_values 					= 1;
 
-		$opt                                                                            = array('resource' => 'product_options');
-		$opt['postXml']                                                                 = $xml->asXML();
-		sleep(1);
-		$xml                                                                            = $webService->add($opt); 
-		$product_options                                                                    = $xml->product_options;
+		$opt                                                                        = array('resource' => 'product_options');
+		$opt['postXml']                                                             = $xml->asXML();
+		//sleep(1);
+		$xml                                                                        = $webService->add($opt); 
+		return $xml->product_option;
 	}
 	catch (PrestaShopWebserviceException $ex) {
 		// Here we are dealing with errors
@@ -694,9 +728,10 @@ function add_product_options($data){
 		if ($trace[0]['args'][0] == 404) echo 'Bad ID';
 		else if ($trace[0]['args'][0] == 401) echo 'Bad auth key';
 		else echo 'Other error<br />'.$ex->getMessage();
+		return;
 	}
 	//insert stock
-	return $combination;
+
 }
 
 /*
@@ -720,28 +755,27 @@ function add_product_options($data){
 > 	</product_option_value>
 > </product_option_values>
 */
-function add_product_option_values($data) {
+function add_product_option_values($data, $parent) {
 global $webService;
 	try{
 		$xml = $webService->get(array('url' => PS_SHOP_PATH.'/api/product_option_values?schema=blank'));
 		
-		$product_option_values                                                              = $xml->children()->children();
-		$product_option_values->id_attribute_group											= 0;
+		$product_option_values                                          = $xml->children()->children();
+		$product_option_values->id_attribute_group						= (int) $parent;
 
 
-		$product_option_values->color                                                       = 'select';
-		$product_option_values->position                                                    = 1;
+		$product_option_values->color                                   = 'select';
+		$product_option_values->position                                = 1;
 
-		$product_option_values->name->language[0][0]                           				= 'Size';
-		$product_option_values->name->language[0][0]['id']                     				= 1;
-		$product_option_values->name->language[0][0]['xlink:href'] 							= PS_SHOP_PATH . '/api/languages/' . 1;
-
-
-		$opt                                                                            	= array('resource' => 'product_option_values');
-		$opt['postXml']                                                                 	= $xml->asXML();
-		sleep(1);
-		$xml                                                                            	= $webService->add($opt); 
-		$product_options                                                                    = $xml->product_options;
+		$product_option_values->name->language[0][0]                    = $data[2] . " " . $data[3];
+		$product_option_values->name->language[0][0]['id']              = 1;
+		$product_option_values->name->language[0][0]['xlink:href'] 		= PS_SHOP_PATH . '/api/languages/' . 1;
+		$opt 															= array('resource' => 'product_option_values');
+		$opt['postXml']                                                 = $xml->asXML();
+		//sleep(1);
+		$xml                                                            = $webService->add($opt); 
+		$product_options                                                = $xml->product_options;
+		return $product_options;
 	}
 	catch (PrestaShopWebserviceException $ex) {
 		// Here we are dealing with errors
@@ -749,9 +783,10 @@ global $webService;
 		if ($trace[0]['args'][0] == 404) echo 'Bad ID';
 		else if ($trace[0]['args'][0] == 401) echo 'Bad auth key';
 		else echo 'Other error<br />'.$ex->getMessage();
+		return;
 	}
 	//insert stock
-	return $combination;
+
 
 }
 
