@@ -279,6 +279,7 @@ foreach ($files['famweb'] as $Akey => $famweb)
 			if(( (int) (explode('.', $famweb[1], 2)[0]) % 100) == 0) 
 			{
 				//Si c'est une catégorie
+				var_dump($famweb[1]);
 				$id_parent	= 2; //Accueil
 				
 			}
@@ -287,9 +288,9 @@ foreach ($files['famweb'] as $Akey => $famweb)
 				//11	101.Solitaires	T  -> 101 : categorie 1
 				//Marche que jusqu'a 9 :s
 				$first_chiffre = explode('.', $famweb[1], 2)[0][0];
-				$id_parent = (int) $correspondance['categories'][$first_chiffre][0];
-			}
+				$id_parent = (int) $correspondance['categories'][$first_chiffre];
 
+			}
 
 			$category_id = make_categorie($famweb, $id_parent);
 			$correspondance['categories'][$famweb[0]] = (int) $category_id;
@@ -304,6 +305,7 @@ foreach ($files['famweb'] as $Akey => $famweb)
 				$category_exist++;
 			}
 	}
+	
 
 
 	if($famweb[2] != null )
@@ -323,8 +325,6 @@ if(LEVEL)
 	else
 		echo "Toutes les categories ont etaient injectees\n\r";
 }
-
-
 
 
 
@@ -506,7 +506,7 @@ if(LEVEL)
 }
 
 
-die();
+
 
 
 // SI Archivage est activé
@@ -670,8 +670,8 @@ function del_product($id){
 	  	{
 	  		echo 'Error : '.$ex->getMessage();
 	  	}
-var_dump($xml);
-die();
+//var_dump($xml);
+//die();
 	
 	return $xml;
 
