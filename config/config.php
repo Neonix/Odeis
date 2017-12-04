@@ -1,6 +1,6 @@
 <?php
 
-define('DEBUG', true);
+define('DEBUG', false);
 define('LEVEL', 3);
 define('ARCHIVE', false);
 

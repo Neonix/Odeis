@@ -418,6 +418,9 @@ if(LEVEL)
 
 
 // Aucun article ajouter on regarde si il ya des dispo
+/*
+* TODO: Code trop long: voir optimisation
+*/
 $d = 0;
 if($i == 0)
 {
@@ -468,35 +471,6 @@ if($i == 0)
 					$read3++;
 			}
 		}
-
-
-
-
-
-		
-
-/*
-		if($dispo[3] == $article[14]) //Si la Ref web Article à une Dispo
-		{
-			$files['articles'][$Akey]['dispo'] = $dispo; //Assosciation de la dispo à l'article
-			$i++;
-
-			if($files['articles'][$Akey]['dispo'][5] == 'unique')
-			{
-				//TODO TRAINTEMENT UNIQUE !!
-				//var_dump($files['articles'][$Akey]);
-				//die('unique');
-
-				if(LEVEL && !isset($read1)) {
-					echo "/! PAS DE TRAITEMENT POUR ARTICLE UNIQUE ATM\n\r";
-					$read1 = true;
-				}
-			}
-
-
-		}
-*/
-
 		
 	}
 }
