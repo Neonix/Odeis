@@ -105,46 +105,55 @@ class dispo {
 
 }
 
+// TELECHARGEMENT DES FICHIERS
+//$content = file_get_contents('ftp://'.$ftp["username"].':'.$ftp["password"].'@'.$ftp["serveur"].':'.$ftp["port"]. '/' .$files["articles"]);
+
+
+//1. Mise à jour des articles
+//2. Mise à jour des disponibilités stock
+//3. Mise à jour de « Réparations »
+//4. Mise à jour du fichier clients
+
+
 
 // VERIFICATION DES FICHIERS
 foreach ($files as $Akey => $value)
 {
-	if (!file_exists(PATH . $value)) {
-	    echo "Le fichier $value n'existe pas.\n\r";
-	      die();
+	if (!file_exists(PATH . 'articles/' .$Akey .'.txt')) {
+	    echo "Le fichier $Akey.txt n'existe pas.\n\r";
+	      //die('ERROR: files');
 	}
 }
+
+
 // VERIFICATION DE LURL API
 if(! @get_headers(PS_SHOP_PATH) || @get_headers(PS_SHOP_PATH)[0] == 'HTTP/1.1 404 Not Found') {
     echo PS_SHOP_PATH . " API URL not found.\n\r";
 	die();
 }
+
+
 //	FICHIER DE CORRESPONDANCE ID ODEIS ET PRESTASHOP
-if($recoveredData = file_get_contents(PATH . "articles/rapprochement.txt"))
+if($recoveredData = file_get_contents(FILE_RAPPROCHEMENT))
 $correspondance = json_decode($recoveredData, true);
+
+
 //	CREATION DU TABLEAU VIDE SI FIRST TIME
 if(!isset($correspondance))
 	$correspondance = array();
-file_put_contents(PATH . "articles/rapprochement.txt", json_encode($correspondance));
-
-
-
+file_put_contents(FILE_RAPPROCHEMENT, json_encode($correspondance));
 
 
 // CHARGEMENT DE TOUS LES FICHIERS
 foreach ($files as $key => $value)
 {
-	try
-	{
-		$file = new CsvImporter(PATH . $value,false);
+
+	if (file_exists(PATH . 'articles/' .$key . '.txt')) {
+		$file = new CsvImporter(PATH . 'articles/' .$key . '.txt',false);
 		$files[$key] = $file->get();
 	}
-	catch (Exception $e) {
-            var_dump($e->getMessage());
-        }
+
 }
-
-
 
 
 
@@ -226,7 +235,7 @@ foreach ($files['code_attribut'] as $Ckey => $code_attribut)
 			(int) $id_category_attribut = $xml->id;
 			
 			$correspondance['code_attribut'][$code_attribut[0]] = $id_category_attribut;
-			file_put_contents(PATH . "articles/rapprochement.txt", json_encode($correspondance));
+			file_put_contents(FILE_RAPPROCHEMENT, json_encode($correspondance));
 		
 
 			foreach ($files['attributs'] as $Akey => $attributs)
@@ -236,7 +245,7 @@ foreach ($files['code_attribut'] as $Ckey => $code_attribut)
 					
 					$xml = add_product_option_values($attributs, $id_category_attribut);
 					$correspondance['attributs'][$attributs[2]] = (int) $xml->id;
-					file_put_contents(PATH . "articles/rapprochement.txt", json_encode($correspondance));
+					file_put_contents(FILE_RAPPROCHEMENT, json_encode($correspondance));
 				}
 			}
 		}
@@ -247,6 +256,7 @@ foreach ($files['code_attribut'] as $Ckey => $code_attribut)
 
 }
 
+// @TODO  VERIFICATION DES ATTRIBUTS AJOUTER OU MODIFIER
 
 
 
@@ -274,7 +284,6 @@ foreach ($files['famweb'] as $Akey => $famweb)
 			}
 			else 
 			{
-
 				//11	101.Solitaires	T  -> 101 : categorie 1
 				//Marche que jusqu'a 9 :s
 				$first_chiffre = explode('.', $famweb[1], 2)[0][0];
@@ -284,7 +293,7 @@ foreach ($files['famweb'] as $Akey => $famweb)
 
 			$category_id = make_categorie($famweb, $id_parent);
 			$correspondance['categories'][$famweb[0]] = (int) $category_id;
-			file_put_contents(PATH . "articles/rapprochement.txt", json_encode($correspondance));
+			file_put_contents(FILE_RAPPROCHEMENT, json_encode($correspondance));
 
 		}
 		else
@@ -336,7 +345,7 @@ foreach ($files['articles'] as $Akey => $articles)
 
 			$product = make_product($articles);
 			$correspondance['articles'][$articles[14]] = (int) $product->id; //Association ID presta 
-			file_put_contents(PATH . "articles/rapprochement.txt", json_encode($correspondance)); //On enregistre
+			file_put_contents(FILE_RAPPROCHEMENT, json_encode($correspondance)); //On enregistre
 
 			add_image($product->id, $articles); //On ajoute l'image associé
 
@@ -353,7 +362,7 @@ foreach ($files['articles'] as $Akey => $articles)
 				 );
 
 				$correspondance['stock'][$articles[14]] = (int) $stock->id;
-				file_put_contents(PATH . "articles/rapprochement.txt", json_encode($correspondance));
+				file_put_contents(FILE_RAPPROCHEMENT, json_encode($correspondance));
 
 			}
 			if(LEVEL)
@@ -366,7 +375,7 @@ foreach ($files['articles'] as $Akey => $articles)
 			
 		}
 		else
-		{
+		{	//DELETE D'UN ARTICLE
 			if($articles[15] == 'S')
 			{
 				if(isset($correspondance['articles'][$articles[14]]))
@@ -374,10 +383,10 @@ foreach ($files['articles'] as $Akey => $articles)
 
 					del_product($correspondance['articles'][$articles[14]]);
 					
-					unset($correspondance['articles'][$articles[14]]);
-					unset($correspondance['stock'][$articles[14]]);
+					unset($correspondance['articles'][$articles[14]]);//Delete dans notre fichier de correspondance
+					unset($correspondance['stock'][$articles[14]]);//Delete dans notre fichier de correspondance
 
-					file_put_contents(PATH . "articles/rapprochement.txt", json_encode($correspondance)); //On enregistre
+					file_put_contents(FILE_RAPPROCHEMENT, json_encode($correspondance)); //On enregistre
 
 				}
 				else
@@ -386,21 +395,138 @@ foreach ($files['articles'] as $Akey => $articles)
 
 			if(LEVEL)
 			{
-				if(!isset($article_exist))
+				if(!isset($article_exist))//Compteur de log
 					$article_exist=0;
 				$article_exist++;
 			}
 		}
+
+
+		//si l'article exist on Verifie les stocks;
+
 		
+	}
+}
+if(LEVEL)
+{
+	if(isset($article_exist))
+		echo " ".$article_exist." ARTICLES NON INJECTE CAR PRESENTE \n\r";
+	else
+		echo "Toutes les articles ont etaient injectees\n\r";
+}
+
+
+
+// Aucun article ajouter on regarde si il ya des dispo
+$d = 0;
+if($i == 0)
+{
+
+//var_dump($files);
+	foreach ($files['dispo'] as $Dkey => $dispo)
+	{
+		
+		if($dispo[0] == FIN) // MARQUEUR DE FIN
+			break;
+
+
+		//ON regarde si l'article exist déjà 
+		if(!empty($correspondance['articles'][$dispo[3]]))
+		{
+			$id_product = $correspondance['articles'][$dispo[3]];
+			echo "CA EXIST $id_product !!!!!!\n\r";
+
+			if(!empty($correspondance['stock'][$dispo[3]]))
+			{
+				$id_stock = $correspondance['stock'][$dispo[3]];
+				$d++;
+				echo "CA EXIST $id_stock\n\r";
+			
+				$product = get_product((int) $id_product);
+
+
+				$stock = set_product_quantity( 
+					(int) $dispo[4],
+				 	(int) $product->id, 
+				 	(int) $product->associations->stock_availables->stock_available->id, 
+				 	(int) $product->associations->stock_availables->stock_available->id_product_attribute
+				 );
+
+
+			}
+
+
+		}
+
+
+
+
+
+		
+
+/*
+		if($dispo[3] == $article[14]) //Si la Ref web Article à une Dispo
+		{
+			$files['articles'][$Akey]['dispo'] = $dispo; //Assosciation de la dispo à l'article
+			$i++;
+
+			if($files['articles'][$Akey]['dispo'][5] == 'unique')
+			{
+				//TODO TRAINTEMENT UNIQUE !!
+				//var_dump($files['articles'][$Akey]);
+				//die('unique');
+
+				if(LEVEL && !isset($read1)) {
+					echo "/! PAS DE TRAITEMENT POUR ARTICLE UNIQUE ATM\n\r";
+					$read1 = true;
+				}
+			}
+
+
+		}
+*/
+
+		
+	}
+}
+if(LEVEL)
+{
+	echo "$d injectees\n\r";
+}
+
+
+die();
+
+
+// SI Archivage est activé
+if(ARCHIVE)
+{
+	// ON VERIFIE QUE LE DOSSIER EXIST
+	if(!@opendir(PATH_ARCHIVE))
+		if (!mkdir(PATH_ARCHIVE, 0777, true)) { // ON CREER LE DOSSIER
+    		die('Echec lors de la création des répertoires...');
+		}
+
+	$name='myfile_'.date('m-d-Y_hia');
+	$return = archive_ftp($name);
+	
+
+	//ON DELETE LES FICHIERS DEDANTS
+	$files = glob(PATH . 'articles/*'); // get all file names
+	foreach($files as $file){ // iterate files
+	  if(is_file($file))
+	    unlink($file); // delete file
+	}
+
+	$files = glob(PATH . 'photos/*'); // get all file names
+	foreach($files as $file){ // iterate files
+	  if(is_file($file))
+	    unlink($file); // delete file
 	}
 
 
 
 }
-if(LEVEL)
-	echo " ".$article_exist." ARTICLES NON INJECTE CAR PRESENTE \n\r";
-
-
 
 
 
@@ -419,15 +545,40 @@ if(LEVEL)
 
 
 
+function archive_ftp($output_file)
+{
+	// ARCHIVE FTP
+	// Get real path for our folder
+	$rootPath = realpath(PATH);
 
+	// Initialize archive object
+	$zip = new ZipArchive();
+	$zip->open(PATH_ARCHIVE  . $output_file . '.zip', ZipArchive::CREATE | ZipArchive::OVERWRITE);
 
+	// Create recursive directory iterator
+	/** @var SplFileInfo[] $files */
+	$files = new RecursiveIteratorIterator(
+	    new RecursiveDirectoryIterator($rootPath),
+	    RecursiveIteratorIterator::LEAVES_ONLY
+	);
 
+	foreach ($files as $name => $file)
+	{
+	    // Skip directories (they would be added automatically)
+	    if (!$file->isDir())
+	    {
+	        // Get real and relative path for current file
+	        $filePath = $file->getRealPath();
+	        $relativePath = substr($filePath, strlen($rootPath) + 1);
 
+	        // Add current file to archive
+	        $zip->addFile($filePath, $relativePath);
+	    }
+	}
 
-
-
-
-
+	// Zip archive will be created only after closing object
+	@$zip->close();
+}
 
 
 
@@ -498,28 +649,18 @@ function make_categorie($data, $parent = 2) {
 function del_product($id){
 
 	global $webService;
-
-	try{
-
-	$xml 							= $webService->get(array('url' => PS_SHOP_PATH.'/api/products'));
-	$product                        = $xml->children()->children();
-	$opt['resource'] 				= 'products';
-	//$opt['filter']                  = array('reference' => $data[14]);
-
-	$opt['id'] 						= $id;
-
-	$xml = $webService->delete($opt);
-
-
-	} catch (PrestaShopWebserviceException $e)	{
-		// Here we are dealing with errors
-		$trace = $e->getTrace();
-		if ($trace[0]['args'][0] == 404) echo 'Bad ID';
-		else if ($trace[0]['args'][0] == 401) echo 'Bad auth key';
-		else echo 'Other error<br />'.$e->getMessage();
-		return;
-	}
-
+	try
+	{
+		$xml = $webService->get(array('resource' => 'products', 'id' => $id));
+		foreach ($xml->children()->children() as $attName => $attValue)
+	  		echo $attName.' = '.$attValue.'<br />';
+	  	}
+	  	catch (PrestaShopWebserviceException $ex)
+	  	{
+	  		echo 'Error : '.$ex->getMessage();
+	  	}
+var_dump($xml);
+die();
 	
 	return $xml;
 
@@ -608,6 +749,14 @@ function make_product($data){
 
 
 
+function get_product($id){
+	global $webService, $correspondance;
+
+		$xml                            = $webService->get(array('url' => PS_SHOP_PATH.'/api/products/'.$id));
+		$resources                      = $xml -> children() -> children();
+		return $resources;
+}
+
 
 function add_image($id, $data)
 {
@@ -633,7 +782,7 @@ function add_image($id, $data)
 
 
 function set_product_quantity($quantity, $ProductId, $StokId, $AttributeId){
-	global $webService, $config;
+	global $webService;
 	try {
 		$opt                             = array();
 		$opt['resource']                 = "stock_availables";
@@ -673,7 +822,7 @@ function set_product_quantity($quantity, $ProductId, $StokId, $AttributeId){
 
 
 function add_combination($data){
-	global $webService, $config;
+	global $webService;
 	try{
 		$xml                                               = $webService->get(array('url' => PS_SHOP_PATH.'/api/combinations?schema=blank'));
 		
@@ -709,7 +858,7 @@ function add_combination($data){
 function add_product_options($data){
 	global $webService;
 	try{
-		$xml                                              = $webService->get(array('url' => PS_SHOP_PATH.'/api/product_options?schema=blank'));
+		$xml 									= $webService->get(array('url' => PS_SHOP_PATH.'/api/product_options?schema=blank'));
 		
 		$product_options                                                            = $xml->children()->children();
 		$product_options->is_color_group											= 0;
@@ -796,8 +945,43 @@ global $webService;
 		return;
 	}
 	//insert stock
+}
 
 
+/**
+ * Generate an MD5 hash string from the contents of a directory.
+ *
+ * @param string $directory
+ * @return boolean|string
+ */
+function hashDirectory($directory)
+{
+    if (! is_dir($directory))
+    {
+        return false;
+    }
+ 
+    $files = array();
+    $dir = dir($directory);
+ 
+    while (false !== ($file = $dir->read()))
+    {
+        if ($file != '.' and $file != '..')
+        {
+            if (is_dir($directory . '/' . $file))
+            {
+                $files[] = hashDirectory($directory . '/' . $file);
+            }
+            else
+            {
+                $files[] = md5_file($directory . '/' . $file);
+            }
+        }
+    }
+ 
+    $dir->close();
+ 
+    return md5(implode('', $files));
 }
 
 
