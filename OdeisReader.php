@@ -433,14 +433,13 @@ if($i == 0)
 		//ON regarde si l'article exist déjà 
 		if(!empty($correspondance['articles'][$dispo[3]]))
 		{
+
 			$id_product = $correspondance['articles'][$dispo[3]];
-			echo "CA EXIST $id_product !!!!!!\n\r";
 
 			if(!empty($correspondance['stock'][$dispo[3]]))
 			{
 				$id_stock = $correspondance['stock'][$dispo[3]];
 				$d++;
-				echo "CA EXIST $id_stock\n\r";
 			
 				$product = get_product((int) $id_product);
 
@@ -452,10 +451,22 @@ if($i == 0)
 				 	(int) $product->associations->stock_availables->stock_available->id_product_attribute
 				 );
 
-
+				$correspondance['stock'][$dispo[3]] = (int) $stock->id;
+				file_put_contents(FILE_RAPPROCHEMENT, json_encode($correspondance));
+				
 			}
 
 
+		}
+		else
+		{
+			if(LEVEL && !isset($read3)) {
+				echo "/! DISPO MAIS PAS DARTICLE CORRESPONDANT\n\r";
+				if(!isset($read3))
+					$read3=0;
+				else
+					$read3++;
+			}
 		}
 
 
