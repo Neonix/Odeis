@@ -378,10 +378,32 @@ foreach ($files['articles'] as $Akey => $articles)
 							"option_id" 	=> $correspondance['attributs'][$ATvalue[2]],
 						);
 						$rtnNewArticle = add_combination($newArticle);
+
+
 						//print_r($ATvalue);
 						if(LEVEL > 2) 
 							echo  $product->reference  . " add  combination\n\r";
 					}
+
+
+					/* 	Ajout des stocks au article avec attribut */
+					if($combination = get_product((int) $product->id))
+					{
+						var_dump($combination->associations);
+
+						foreach ($combination->associations->stock_availables->stock_available as $key => $stock_available) {
+							print_r($stock_available->id);
+
+							$stock = set_product_quantity( 
+							(int) $files['articles'][$Akey]['dispo'][4],
+						 	(int) $product->id, 
+						 	(int) $stock_available->id, 
+						 	(int) $stock_available->id_product_attribute
+						 );
+						}
+					}
+
+					
 
 				}
 
