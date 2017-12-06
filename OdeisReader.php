@@ -267,6 +267,7 @@ foreach ($files['code_attribut'] as $Ckey => $code_attribut)
 
 
 // INSERTION EN MASSE DES CATEGORIES
+if($files['famweb'])
 foreach ($files['famweb'] as $Akey => $famweb)
 {
 	if($famweb[0] == FIN) // MARQUEUR DE FIN
@@ -317,7 +318,7 @@ foreach ($files['famweb'] as $Akey => $famweb)
 	{
 		if(LEVEL && !isset($read2))
 		{
-			echo "/! PAS DE TRAITEMENT DATTRIBUS ATM\n\r";
+			echo "/! PAS DE TRAITEMENT DATTRIBUS ATM ".$famweb[2]."\n\r";
 			$read2 = true;
 		}
 	}
@@ -328,7 +329,7 @@ if(LEVEL)
 	if(isset($category_exist))
 		echo $category_exist . " CATEGORIES NON INJECTE CAR PRESENTE\n\r";
 	else
-		echo "Toutes les categories ont etaient injectees\n\r";
+		echo "Toutes les categories ont déjà etaient injectees\n\r";
 }
 
 
@@ -349,11 +350,15 @@ foreach ($files['articles'] as $Akey => $articles)
 			
 
 			$product = make_product($articles);
+			if(LEVEL > 2) 
+				echo  $product->description->language[0][0]  . " add article\n\r";
+
 			$correspondance['articles'][$articles[14]] = (int) $product->id; //Association ID presta 
 			file_put_contents(FILE_RAPPROCHEMENT, json_encode($correspondance)); //On enregistre
 
 			add_image($product->id, $articles); //On ajoute l'image associé
-		
+			if(LEVEL > 2) 
+				echo  $product->reference  . " add  image\n\r";
 
 
 
@@ -366,34 +371,29 @@ foreach ($files['articles'] as $Akey => $articles)
 					{
 						$articlescomb = $articles;
 						$newArticle = array (
-							"code" => $product->reference,
-							"id_product" => $product->id,
-							"price"	=> $product->price,
-							"quantity" => $files['articles'][$Akey]['dispo'][4],
-							"option_id" => $correspondance['attributs'][$ATvalue[2]],
+							"code" 			=> $product->reference,
+							"id_product" 	=> $product->id,
+							"price"			=> $product->price,
+							"quantity" 		=> $files['articles'][$Akey]['dispo'][4],
+							"option_id" 	=> $correspondance['attributs'][$ATvalue[2]],
 						);
-
-
-						add_combination($newArticle);	
-
+						$rtnNewArticle = add_combination($newArticle);
 						//print_r($ATvalue);
-	
+						if(LEVEL > 2) 
+							echo  $product->reference  . " add  combination\n\r";
 					}
 
 				}
 
 				if($files['articles'][$Akey]['dispo'][5] != "unique")
 				{
-
 					//echo "/! TRAITEMENT POUR ARTICLE $dispo[3] \n\r";
-
 					//Famille
 					$files['articles'][$Akey]['dispo'][0];
 
 					var_dump($files['articles'][$Akey]['dispo']);
 					//die("test");
 				}
-
 			}
 
 
@@ -409,7 +409,7 @@ foreach ($files['articles'] as $Akey => $articles)
 				 	(int) $product->associations->stock_availables->stock_available->id_product_attribute
 				 );
 
-				$correspondance['stock'][$articles[14]] = (int) $stock->id;
+				$correspondance['stock'][$articles[14]] = (int) $files['articles'][$Akey]['dispo'][4];
 				file_put_contents(FILE_RAPPROCHEMENT, json_encode($correspondance));
 
 			}
@@ -457,7 +457,7 @@ if(LEVEL)
 	if(isset($article_exist))
 		echo " ".$article_exist." ARTICLES NON INJECTE CAR PRESENTE \n\r";
 	else
-		echo "Toutes les articles ont etaient injectees\n\r";
+		echo "Toutes les articles ont déjà etaient injectees\n\r";
 }
 
 
@@ -465,8 +465,15 @@ if(LEVEL)
 // Aucun article ajouter on regarde si il ya des dispo
 /*
 * TODO: Code trop long: voir optimisation
+* TOTO: Association correct des noms de variable dispo[?] = ?
 */
-$d = 0;
+if(LEVEL && ($i == 0))
+{
+		echo "UPDATE DISPO STOCK DETECTE \n\r";
+}
+
+
+$ctn_updatestock = 0;
 if($i == 0)
 {
 //var_dump($files);
@@ -483,37 +490,62 @@ if($i == 0)
 
 			$id_product = $correspondance['articles'][$dispo[3]];
 
-			if(!empty($correspondance['stock'][$dispo[3]]))
+			if($correspondance['stock'][$dispo[3]] !=  $dispo[4])
 			{
-				$id_stock = $correspondance['stock'][$dispo[3]];
-				$d++;
-			
-				if($product = get_product((int) $id_product))
+				if(!empty($correspondance['stock'][$dispo[3]]))
 				{
-
-					$stock = set_product_quantity( 
-						(int) $dispo[4],
-					 	(int) $product->id, 
-					 	(int) $product->associations->stock_availables->stock_available->id, 
-					 	(int) $product->associations->stock_availables->stock_available->id_product_attribute
-					 );
-
-					$correspondance['stock'][$dispo[3]] = (int) $stock->id;
-					file_put_contents(FILE_RAPPROCHEMENT, json_encode($correspondance));
-				}
+					$ctn_updatestock++;
 				
-			}
+					if($product = get_product((int) $id_product))
+					{
 
+						//TODO get product combinaison et update
+
+						$stock = set_product_quantity( 
+							(int) $dispo[4],
+						 	(int) $product->id, 
+						 	(int) $product->associations->stock_availables->stock_available->id, 
+						 	(int) $product->associations->stock_availables->stock_available->id_product_attribute
+						 );
+
+						//Association du stock[ref article] = quantity
+						$correspondance['stock'][$dispo[3]] =  $dispo[4];
+						file_put_contents(FILE_RAPPROCHEMENT, json_encode($correspondance));
+
+						if(LEVEL)
+							echo  $product->reference  . " update stock ". $dispo[4] ."\n\r";
+
+
+					}
+					
+				}
+				else
+					if(LEVEL)
+						echo  " test stock ". $correspondance['stock'] ."\n\r";
+
+			}
+			else
+			if(LEVEL)
+			{
+				if(!isset($stockNoNeedUpdate))//Compteur de log
+					$stockNoNeedUpdate=0;
+				$stockNoNeedUpdate++;
+			}
 
 		}
 		else
 		{
-			if(LEVEL && !isset($read3)) {
-				echo "/! DISPO MAIS PAS DARTICLE CORRESPONDANT\n\r";
-				if(!isset($read3))
-					$read3=0;
-				else
-					$read3++;
+			if(LEVEL)
+			{
+				if(!isset($articleNotFound))//Compteur de log
+					$articleNotFound=0;
+				else	
+					$articleNotFound++;
+			}
+
+			if(LEVEL > 2) {
+
+				echo  $dispo[3] ." no exist or found - can't update stock ". $dispo[4] ."\n\r";
 			}
 		}
 		
@@ -521,7 +553,12 @@ if($i == 0)
 }
 if(LEVEL)
 {
-	echo "$d injectees\n\r";
+	if(isset($articleNotFound))
+		echo $articleNotFound ." article(s) not found - update stock impossible  \n\r";
+	else
+		echo "Toutes les articles ont etaient injectees \n\r";
+
+	echo "$ctn_updatestock : update de stock \n\r";
 }
 
 
@@ -743,7 +780,7 @@ function make_product($data){
 		
 		$opt                                                        = array('resource' => 'products');
 		$opt['postXml']                                             = $xml->asXML();
-		sleep(1);
+		//sleep(1);
 		$xml                                                        = $webService->add($opt); 
 
 		return $xml->product;
@@ -836,7 +873,7 @@ function set_product_quantity($quantity, $ProductId, $StokId, $AttributeId){
 		$opt['putXml']                   = $xml->asXML();
 		$opt['id']                       = $StokId;
 		$xml                             = $webService->edit($opt);
-		sleep(1);
+		//sleep(1);
 		return $xml->stock_available;
 	}
 	catch (PrestaShopWebserviceException $ex) {
