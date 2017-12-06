@@ -285,7 +285,9 @@ foreach ($files['famweb'] as $Akey => $famweb)
 			if(( (int) (explode('.', $famweb[1], 2)[0]) % 100) == 0) 
 			{
 				//Si c'est une catégorie
-				var_dump($famweb[1]);
+				if(LEVEL > 2)
+					echo $famweb[1] . "Famille injectees \n\r";
+				
 				$id_parent	= 2; //Accueil
 				
 			}
@@ -318,7 +320,7 @@ foreach ($files['famweb'] as $Akey => $famweb)
 	{
 		if(LEVEL && !isset($read2))
 		{
-			echo "/! PAS DE TRAITEMENT DATTRIBUS ATM ".$famweb[2]."\n\r";
+			//echo "/! PAS DE TRAITEMENT DATTRIBUS ATM ".$famweb[2]."\n\r";
 			$read2 = true;
 		}
 	}
@@ -504,14 +506,57 @@ if($i == 0)
 
 			$id_product = $correspondance['articles'][$dispo[3]];
 
-			if($correspondance['stock'][$dispo[3]] !=  $dispo[4])
+			if(!empty($correspondance['stock'][$dispo[3]]))
 			{
-				if(!empty($correspondance['stock'][$dispo[3]]))
+				if($correspondance['stock'][$dispo[3]] !=  $dispo[4])
 				{
 					$ctn_updatestock++;
 				
 					if($product = get_product((int) $id_product))
 					{
+
+
+						//Famille 1	100.BAGUES	T
+						if($dispo[0][0] == '1')
+						{
+							foreach ($files['attributs'] as $ATkey => $ATvalue) 
+							{
+								$articlescomb = $articles;
+								$newArticle = array (
+									"code" 			=> $product->reference,
+									"id_product" 	=> $product->id,
+									"price"			=> $product->price,
+									"quantity" 		=> $dispo[4],
+									"option_id" 	=> $correspondance['attributs'][$ATvalue[2]],
+								);
+								$rtnNewArticle = add_combination($newArticle);
+
+
+								//print_r($ATvalue);
+								if(LEVEL > 2) 
+									echo  $product->reference  . " add  combination\n\r";
+							}
+
+
+							/* 	Ajout des stocks au article avec attribut */
+							if($combination = get_product((int) $product->id))
+							{
+
+								foreach ($combination->associations->stock_availables->stock_available as $key => $stock_available) {
+									//print_r($stock_available->id);
+
+									$stock = set_product_quantity( 
+									(int) $dispo[4],
+								 	(int) $product->id, 
+								 	(int) $stock_available->id, 
+								 	(int) $stock_available->id_product_attribute
+								 );
+								}
+
+							}
+						}
+
+
 
 						//TODO get product combinaison et update
 
@@ -530,21 +575,23 @@ if($i == 0)
 							echo  $product->reference  . " update stock ". $dispo[4] ."\n\r";
 
 
+
+
 					}
 					
 				}
 				else
 					if(LEVEL)
-						echo  " test stock ". $correspondance['stock'] ."\n\r";
+						echo  $dispo[3]  . " no need update \n\r";
 
 			}
 			else
-			if(LEVEL)
-			{
-				if(!isset($stockNoNeedUpdate))//Compteur de log
-					$stockNoNeedUpdate=0;
-				$stockNoNeedUpdate++;
-			}
+				if(LEVEL)
+				{
+					if(!isset($stockNoNeedUpdate))//Compteur de log
+						$stockNoNeedUpdate=0;
+					$stockNoNeedUpdate++;
+				}
 
 		}
 		else
