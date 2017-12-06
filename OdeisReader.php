@@ -186,6 +186,11 @@ foreach ($files['articles'] as $Akey => $article)
 					$read1 = true;
 				}
 			}
+			else
+			{
+
+
+			}
 
 
 		}
@@ -348,8 +353,51 @@ foreach ($files['articles'] as $Akey => $articles)
 			file_put_contents(FILE_RAPPROCHEMENT, json_encode($correspondance)); //On enregistre
 
 			add_image($product->id, $articles); //On ajoute l'image associé
+		
 
-			//var_dump($product);
+
+
+			if( isset($files['articles'][$Akey]['dispo']) ) 
+			{	
+				//Famille 1	100.BAGUES	T
+				if($files['articles'][$Akey]['dispo'][0][0] == '1')
+				{
+					foreach ($files['attributs'] as $ATkey => $ATvalue) 
+					{
+						$articlescomb = $articles;
+						$newArticle = array (
+							"code" => $product->reference,
+							"id_product" => $product->id,
+							"price"	=> $product->price,
+							"quantity" => $files['articles'][$Akey]['dispo'][4],
+							"option_id" => $correspondance['attributs'][$ATvalue[2]],
+						);
+
+
+						add_combination($newArticle);	
+
+						//print_r($ATvalue);
+	
+					}
+
+				}
+
+				if($files['articles'][$Akey]['dispo'][5] != "unique")
+				{
+
+					//echo "/! TRAITEMENT POUR ARTICLE $dispo[3] \n\r";
+
+					//Famille
+					$files['articles'][$Akey]['dispo'][0];
+
+					var_dump($files['articles'][$Akey]['dispo']);
+					//die("test");
+				}
+
+			}
+
+
+
 
 			if( isset($files['articles'][$Akey]['dispo']) ) //On regarde si on à une dispo 
 			{		
@@ -401,10 +449,7 @@ foreach ($files['articles'] as $Akey => $articles)
 			}
 		}
 
-
 		//si l'article exist on Verifie les stocks;
-
-		
 	}
 }
 if(LEVEL)
@@ -424,7 +469,6 @@ if(LEVEL)
 $d = 0;
 if($i == 0)
 {
-
 //var_dump($files);
 	foreach ($files['dispo'] as $Dkey => $dispo)
 	{
@@ -444,18 +488,19 @@ if($i == 0)
 				$id_stock = $correspondance['stock'][$dispo[3]];
 				$d++;
 			
-				$product = get_product((int) $id_product);
+				if($product = get_product((int) $id_product))
+				{
 
+					$stock = set_product_quantity( 
+						(int) $dispo[4],
+					 	(int) $product->id, 
+					 	(int) $product->associations->stock_availables->stock_available->id, 
+					 	(int) $product->associations->stock_availables->stock_available->id_product_attribute
+					 );
 
-				$stock = set_product_quantity( 
-					(int) $dispo[4],
-				 	(int) $product->id, 
-				 	(int) $product->associations->stock_availables->stock_available->id, 
-				 	(int) $product->associations->stock_availables->stock_available->id_product_attribute
-				 );
-
-				$correspondance['stock'][$dispo[3]] = (int) $stock->id;
-				file_put_contents(FILE_RAPPROCHEMENT, json_encode($correspondance));
+					$correspondance['stock'][$dispo[3]] = (int) $stock->id;
+					file_put_contents(FILE_RAPPROCHEMENT, json_encode($correspondance));
+				}
 				
 			}
 
@@ -664,7 +709,7 @@ function make_product($data){
 		$product->unit_price_ratio								 	= (int) $data[9];
 
 		$product->active                                         	= '1';
-		$product->on_sale                                        	= 1; //on ne veux pas de bandeau promo
+		$product->on_sale                                        	= 0; //on ne veux pas de bandeau promo
 		$product->show_price                                     	= 1;
 		$product->available_for_order                            	= 1;
 		$product->state 										 	= 1;
