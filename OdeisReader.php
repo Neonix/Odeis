@@ -389,7 +389,7 @@ foreach ($files['articles'] as $Akey => $articles)
 					/* 	Ajout des stocks au article avec attribut */
 					if($combination = get_product((int) $product->id))
 					{
-						var_dump($combination->associations);
+						//var_dump($combination->associations);
 
 						foreach ($combination->associations->stock_availables->stock_available as $key => $stock_available) {
 							print_r($stock_available->id);
@@ -407,15 +407,7 @@ foreach ($files['articles'] as $Akey => $articles)
 
 				}
 
-				if($files['articles'][$Akey]['dispo'][5] != "unique")
-				{
-					//echo "/! TRAITEMENT POUR ARTICLE $dispo[3] \n\r";
-					//Famille
-					$files['articles'][$Akey]['dispo'][0];
-
-					var_dump($files['articles'][$Akey]['dispo']);
-					//die("test");
-				}
+			
 			}
 
 
