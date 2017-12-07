@@ -2,7 +2,7 @@
 
 define('DEBUG', false);
 define('LEVEL', 3);
-define('ARCHIVE', false);
+define('ARCHIVE', true);
 
 define('PS_SHOP_PATH', 'http://localhost');
 define('PATH', 'FTP/');
@@ -21,17 +21,8 @@ define('PS_WS_AUTH_KEY', 'TMAY3ILMIEYPE3TSF6L8Z6UVMBZ1T5PU');
 $ftp 			= array (
 					"serveur" 		=> 'diams.dev.oneshot.nc',
 					"port"			=> 10021,
-					"username"		=> "ftp-dev-diams-odeis",
-					"password" 		=> "493QAk*T9EA1"
+					"username"		=> "",
+					"password" 		=> ""
 	);
 
-/* TOUS LES FICHIERS UTILES */
-$files 			= array( 
-					"articles" 		=> "",
-					"attributs" 	=> "",
-					"code_attribut" => "",
-					"dispo" 		=> "",
-					"famweb" 		=> "",
-					"markweb" 		=> "",
-					"photos" 		=> "",
-				);
+
