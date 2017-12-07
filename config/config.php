@@ -15,14 +15,12 @@ define('PATH_ARCHIVE', 'archive/');
 
 define('PS_WS_AUTH_KEY', 'TMAY3ILMIEYPE3TSF6L8Z6UVMBZ1T5PU');
 
-
-
 /* FTP */
-$ftp 			= array (
-					"serveur" 		=> 'diams.dev.oneshot.nc',
-					"port"			=> 10021,
-					"username"		=> "",
-					"password" 		=> ""
-	);
+$ftp = array (
+	"serveur" 		=> 'diams.dev.oneshot.nc',
+	"port"			=> 10021,
+	"username"		=> "",
+	"password" 		=> ""
+);
 
 
