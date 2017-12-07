@@ -11,9 +11,9 @@ $time_start 	= microtime(true);
 
 header('Content-Type: text/html; charset=iso-8859-1');
 
-require_once('./class/PSWebServiceLibrary.php');
-require_once('./class/CsvImporter.php');
-require_once('./config/config.php');
+require_once(__DIR__ . '/class/PSWebServiceLibrary.php');
+require_once(__DIR__ . '/class/CsvImporter.php');
+require_once(__DIR__ . '/config/config.php');
 
 
 
@@ -111,7 +111,7 @@ if(is_file(FILE_LOCK) )
 	if((int) $lock + EXEC_DIFF_TIME > time())
 	{
 		$time_stay = ((int) $lock + EXEC_DIFF_TIME) - time();
-		die("Le script est en cours d'execution wait $time_stay secondes \n\r");
+		die(FILE_LOCK . "Le script est en cours d'execution wait $time_stay secondes \n\r");
 	}
 	else
 		unlink(FILE_LOCK);
@@ -142,9 +142,11 @@ if(! @get_headers(PS_SHOP_PATH) || @get_headers(PS_SHOP_PATH)[0] == 'HTTP/1.1 40
 
 
 //	FICHIER DE CORRESPONDANCE ID ODEIS ET PRESTASHOP
-if($recoveredData = file_get_contents(FILE_RAPPROCHEMENT))
-$correspondance = json_decode($recoveredData, true);
-
+if(is_file(FILE_RAPPROCHEMENT) )
+{
+	if($recoveredData = file_get_contents(FILE_RAPPROCHEMENT))
+	$correspondance = json_decode($recoveredData, true);
+}
 
 //	CREATION DU TABLEAU VIDE SI FIRST TIME
 if(!isset($correspondance))
@@ -166,6 +168,7 @@ foreach ($files as $key => $value)
 
 
 // ASSOCIATION ARTICLES ET DISPOS
+if($files['articles'])
 foreach ($files['articles'] as $Akey => $article)
 {
 	
@@ -696,6 +699,7 @@ function archive_ftp($output_file)
 	// Get real path for our folder
 	$rootPath = realpath(PATH);
 
+
 	// Initialize archive object
 	$zip = new ZipArchive();
 	$zip->open(PATH_ARCHIVE  . $output_file . '.zip', ZipArchive::CREATE | ZipArchive::OVERWRITE);
@@ -911,6 +915,8 @@ function add_image($id, $data)
 
 	if(@isset($id)) {
 		$cfile = new CURLFile(PATH . 'photos/' . $data[2], 'image/jpg', $data[2]);
+
+
 		$ch = curl_init();
 		curl_setopt($ch, CURLOPT_URL, PS_SHOP_PATH . '/api/images/products/'.$id.'?ps_method=POST');
 		curl_setopt($ch, CURLOPT_POST, true);
@@ -975,7 +981,7 @@ function add_combination($data){
 		$combination->associations->product_option_values->product_option_values[0]->id = $data["option_id"];
 		$combination->reference                                                         = $data["code"];
 		$combination->id_product                                                        = $data["id_product"];
-		$combination->price                                                             = $data["price"]; //Prix TTC
+		$combination->price                                                             = 0; //Prix TTC
 		$combination->show_price                                                        = 1;
 		$combination->quantity                                                          = $data["quantity"]; //Prix TTC
 		$combination->minimal_quantity                                                  = 1;
