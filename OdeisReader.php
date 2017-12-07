@@ -1,28 +1,4 @@
 <?php
-/*
-
-Le connecteur doit à réception du fichier articles.txt (dernier fichier envoyé) :
-- soit mettre à jour les informations correspondantes à chaque article présent dans articles.txt
-et mettre sa quantité à jour à partir du fichier dispo.txt
-- soit supprimer (ou désactiver) dans le cas des articles marqués "S".
-
-
-
-Fichier des disponibilités en stock
-Nom :dispo.txt
-1iere ligne d’entête : famille four reffour refweb qte taille Dernière ligne : [FIN]
-Si les paramétrages « Gérer les stocks disponibles » et « Par tailles » sont cochés Et que la famille de l’article ne gère
-pas de tailles :
-Le champ 6 contient le mot réservé « unique »
-et la quantité est calculée sur la référence fournisseur.
-Si les paramétrages « Gérer les stocks disponibles » et « Par tailles » sont cochés Et que la famille de l’article gère
-des tailles :
-Le champ 6 contient la taille
-et la quantité est calculée sur la référence fournisseur à taille.
-Si les paramétrages « Gérer les stocks disponibles » est coché et « Par tailles » non coché le champ 6 n’est pas envoyé et
-la quantité est calculée sur la référence fournisseur
-
-*/
 
 set_time_limit(0);
 
@@ -42,7 +18,16 @@ require_once('./config/config.php');
 
 
 
-
+/* TOUS LES FICHIERS UTILES */
+$files 			= array( 
+					"articles" 		=> "",
+					"attributs" 	=> "",
+					"code_attribut" => "",
+					"dispo" 		=> "",
+					"famweb" 		=> "",
+					"markweb" 		=> "",
+					"photos" 		=> "",
+				);
 
 /*
 	N° colonne          Champ                           Ex
