@@ -116,14 +116,11 @@ class dispo {
 
 
 
-//SEMAPHORE
+// FICHIER DE PROTECTION POUR EVITER LES MULTIPLES EXECUTIONS
 if(is_file(FILE_LOCK) )
 {
 
 	$lock = file_get_contents(FILE_LOCK);
-	print($lock . "\n\r");
-	print(time());
-
 	if((int) $lock + EXEC_DIFF_TIME > time())
 	{
 		$time_stay = ((int) $lock + EXEC_DIFF_TIME) - time();
@@ -138,9 +135,6 @@ else
 	$lock = time();
 	file_put_contents(FILE_LOCK, json_encode($lock));
 }
-
-
-
 
 
 // VERIFICATION DES FICHIERS
@@ -656,6 +650,8 @@ if(LEVEL)
 // SI Archivage est activé
 if(ARCHIVE)
 {
+	if(LEVEL)
+		echo  "Archivage des fichiers \n\r";
 	// ON VERIFIE QUE LE DOSSIER EXIST
 	if(!@opendir(PATH_ARCHIVE))
 		if (!mkdir(PATH_ARCHIVE, 0777, true)) { // ON CREER LE DOSSIER
@@ -669,19 +665,26 @@ if(ARCHIVE)
 	//ON DELETE LES FICHIERS DEDANTS
 	$files = glob(PATH . 'articles/*'); // get all file names
 	foreach($files as $file){ // iterate files
-	  if(is_file($file))
-	    unlink($file); // delete file
+		if(is_file($file))
+			unlink($file); // delete file
+
+		if(LEVEL > 2)
+			echo  "Delete $file \n\r";
 	}
 
 	$files = glob(PATH . 'photos/*'); // get all file names
 	foreach($files as $file){ // iterate files
-	  if(is_file($file))
-	    unlink($file); // delete file
+		if(is_file($file))
+			unlink($file); // delete file
+		
+		if(LEVEL > 2)
+			echo  "Delete $file \n\r";
 	}
-
-
-
 }
+
+
+if( is_file(FILE_LOCK) )
+	unlink(FILE_LOCK);
 
 
 
