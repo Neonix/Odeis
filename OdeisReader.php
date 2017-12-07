@@ -116,6 +116,33 @@ class dispo {
 
 
 
+//SEMAPHORE
+if(is_file(FILE_LOCK) )
+{
+
+	$lock = file_get_contents(FILE_LOCK);
+	print($lock . "\n\r");
+	print(time());
+
+	if((int) $lock + EXEC_DIFF_TIME > time())
+	{
+		$time_stay = ((int) $lock + EXEC_DIFF_TIME) - time();
+		die("Le script est en cours d'execution wait $time_stay secondes \n\r");
+	}
+	else
+		unlink(FILE_LOCK);
+
+}
+else
+{
+	$lock = time();
+	file_put_contents(FILE_LOCK, json_encode($lock));
+}
+
+
+
+
+
 // VERIFICATION DES FICHIERS
 foreach ($files as $Akey => $value)
 {
@@ -394,7 +421,7 @@ foreach ($files['articles'] as $Akey => $articles)
 						//var_dump($combination->associations);
 
 						foreach ($combination->associations->stock_availables->stock_available as $key => $stock_available) {
-							print_r($stock_available->id);
+							//print_r($stock_available->id);
 
 							$stock = set_product_quantity( 
 							(int) $files['articles'][$Akey]['dispo'][4],

@@ -5,8 +5,10 @@ define('LEVEL', 3);
 define('ARCHIVE', false);
 
 define('PS_SHOP_PATH', 'http://localhost');
-define('PATH', 'FTP2/');
+define('PATH', 'FTP/');
 
+define('FILE_LOCK', 'verrou');
+define('EXEC_DIFF_TIME', 3600);
 define('FILE_RAPPROCHEMENT', 'rapprochement.txt');
 define('PATH_ARCHIVE', 'archive/');
 
