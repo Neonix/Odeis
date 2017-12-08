@@ -29,6 +29,16 @@ $files 			= array(
 					"photos" 		=> "",
 				);
 
+
+if (!function_exists('curl_file_create')) {
+    function curl_file_create($filename, $mimetype = '', $postname = '') {
+        return "@$filename;filename="
+            . ($postname ?: basename($filename))
+            . ($mimetype ? ";type=$mimetype" : '');
+    }
+}
+
+
 /*
 	N° colonne          Champ                           Ex
 	1                   Code Famille                    B
