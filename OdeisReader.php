@@ -823,6 +823,10 @@ function make_product($data){
 	//Taxe a définir 
 	$id_tax_rules_group = 1;
 
+	$taxe = 100 - (100 * (float) $data[10]) /  (float) $data[9] ;
+	if(round($taxe, 1, PHP_ROUND_HALF_UP) == 0.2)
+		$id_tax_rules_group = 2;
+
 	try{
 		$xml                                                     	= $webService->get(array('url' => PS_SHOP_PATH.'/api/products?schema=blank'));
 		$product                                                 	= $xml->children()->children();
