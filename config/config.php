@@ -16,11 +16,19 @@ define('PATH_ARCHIVE', __DIR__ . '/../archives/');
 define('PS_WS_AUTH_KEY', 'TMAY3ILMIEYPE3TSF6L8Z6UVMBZ1T5PU');
 
 /* FTP */
-$ftp = array (
+$_ftp = array (
 	"serveur" 		=> 'diams.dev.oneshot.nc',
 	"port"			=> 10021,
 	"username"		=> "",
 	"password" 		=> ""
 );
 
+
+/* Association de la diff ht ttc par rapport à la taxe prestashop  */
+//$taxe = 100 - (100 * (float) $data[10]) /  (float) $data[9] ;
+$_taxe = array(
+	0 => 1, //Par default
+	1 => 1,
+	0.2 => 2,
+);
 

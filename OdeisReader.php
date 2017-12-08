@@ -817,15 +817,30 @@ function del_product($id){
 
 
 function make_product($data){
-	global $webService, $correspondance;
+	global $webService, $correspondance, $_taxe;
 	
 
 	//Taxe a définir 
-	$id_tax_rules_group = 1;
+
 
 	$taxe = 100 - (100 * (float) $data[10]) /  (float) $data[9] ;
-	if(round($taxe, 1, PHP_ROUND_HALF_UP) == 0.2)
-		$id_tax_rules_group = 2;
+	$taxe = round($taxe, 1, PHP_ROUND_HALF_UP);
+
+	if(isset($_taxe[$taxe])){
+		$id_tax_rules_group = (int) $_taxe[$taxe];
+	}
+	else
+	{
+		if(LEVEL)
+			echo  "/! No taxe $taxe find taxe par default $_taxe[0] \n\r";
+		$id_tax_rules_group = (int) $_taxe[0];
+	}
+
+var_dump($id_tax_rules_group);
+
+
+
+
 
 	try{
 		$xml                                                     	= $webService->get(array('url' => PS_SHOP_PATH.'/api/products?schema=blank'));
