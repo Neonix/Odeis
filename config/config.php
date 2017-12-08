@@ -27,7 +27,7 @@ $_ftp = array (
 /* Association de la diff ht ttc par rapport à la taxe prestashop  */
 //$taxe = 100 - (100 * (float) $data[10]) /  (float) $data[9] ;
 $_taxe = array(
-	0 => 1, //Par default
+	0 => 0, //Par default
 	1 => 1,
 	0.2 => 2,
 );

@@ -821,8 +821,6 @@ function make_product($data){
 	
 
 	//Taxe a définir 
-
-
 	$taxe = 100 - (100 * (float) $data[10]) /  (float) $data[9] ;
 	$taxe = round($taxe, 1, PHP_ROUND_HALF_UP);
 
@@ -836,7 +834,6 @@ function make_product($data){
 		$id_tax_rules_group = (int) $_taxe[0];
 	}
 
-var_dump($id_tax_rules_group);
 
 
 
