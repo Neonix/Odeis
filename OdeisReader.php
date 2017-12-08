@@ -819,13 +819,17 @@ function del_product($id){
 function make_product($data){
 	global $webService, $correspondance;
 	
+
+	//Taxe a définir 
+	$id_tax_rules_group = 1;
+
 	try{
 		$xml                                                     	= $webService->get(array('url' => PS_SHOP_PATH.'/api/products?schema=blank'));
 		$product                                                 	= $xml->children()->children();
 		
-		$product->price                                          	= (int) $data[9]; //Prix TTC
-		$product->wholesale_price                                	= (int) $data[10]; //Prix d'achat
-		$product->unit_price_ratio								 	= (int) $data[9];
+		$product->price                                          	= (float) $data[10]; //Prix TTC
+		$product->wholesale_price                                	= (float) $data[10]; //Prix d'achat
+		$product->unit_price_ratio								 	= (float) $data[10];
 
 		$product->active                                         	= '1';
 		$product->on_sale                                        	= 0; //on ne veux pas de bandeau promo
@@ -834,6 +838,8 @@ function make_product($data){
 		$product->state 										 	= 1;
 		$product->depends_on_stock 								 	= 1;
 		
+		$product->id_tax_rules_group								= $id_tax_rules_group;
+
 		$product->name->language[0][0]                           	= utf8_encode($data[4]);
 		$product->name->language[0][0]['id']                     	= 1;
 		$product->name->language[0][0]['xlink:href'] 			 	= PS_SHOP_PATH . '/api/languages/' . 1;
@@ -856,8 +862,6 @@ function make_product($data){
 
 		$product->id_category_default								= $correspondance['categories'][$data[0]];
 		
-		
-		$product->unit_price_ratio 									= (int) $data[9];
 
 		
 		$opt                                                        = array('resource' => 'products');
