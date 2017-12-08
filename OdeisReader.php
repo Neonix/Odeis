@@ -640,13 +640,15 @@ if(LEVEL)
 // SI Archivage est activé
 if(ARCHIVE)
 {
-	if(LEVEL)
-		echo  "Archivage des fichiers \n\r";
 	// ON VERIFIE QUE LE DOSSIER EXIST
 	if(!@opendir(PATH_ARCHIVE))
 		if (!mkdir(PATH_ARCHIVE, 0777, true)) { // ON CREER LE DOSSIER
     		die('Echec lors de la création des répertoires...');
 		}
+
+	if(LEVEL)
+		echo  "Archivage des fichiers en cours\n\r";
+
 
 	$name='myfile_'.date('m-d-Y_hia');
 	$return = archive_ftp($name);
