@@ -30,14 +30,6 @@ $files 			= array(
 				);
 
 
-if (!function_exists('curl_file_create')) {
-    function curl_file_create($filename, $mimetype = '', $postname = '') {
-        return "@$filename;filename="
-            . ($postname ?: basename($filename))
-            . ($mimetype ? ";type=$mimetype" : '');
-    }
-}
-
 
 /*
 	N° colonne          Champ                           Ex
@@ -945,7 +937,15 @@ function add_image($id, $data)
 	if(!file_exists(PATH . 'photos/' . $data[2]))
 		echo PATH . "photos/" . $data[2] . "not found \n\r";
 
+	if (!function_exists('CURLFile')) {
+	    function CURLFile($filename, $mimetype = 'image/jpg', $postname = '') {
+        	$im = file_get_contents($filename);
+       	 	return( base64_encode($im) );
+	    }
+	}
+
 	if(@isset($id)) {
+
 		$cfile = new CURLFile(PATH . 'photos/' . $data[2], 'image/jpg', $data[2]);
 
 
