@@ -16,7 +16,7 @@ require_once(__DIR__ . '/class/CsvImporter.php');
 require_once(__DIR__ . '/config/config.php');
 
 
-
+echo "\n\r";
 
 /* TOUS LES FICHIERS UTILES */
 $files 			= array( 
@@ -937,16 +937,13 @@ function add_image($id, $data)
 	if(!file_exists(PATH . 'photos/' . $data[2]))
 		echo PATH . "photos/" . $data[2] . "not found \n\r";
 
-	if (!function_exists('CURLFile')) {
-	    function CURLFile($filename, $mimetype = 'image/jpg', $postname = '') {
-        	$im = file_get_contents($filename);
-       	 	return( base64_encode($im) );
-	    }
-	}
-
 	if(@isset($id)) {
 
+		if(class_exists('CURLFile')) {
 		$cfile = new CURLFile(PATH . 'photos/' . $data[2], 'image/jpg', $data[2]);
+		} else {
+			$cfile = '@' . PATH . 'photos/' . $data[2];
+		}
 
 
 		$ch = curl_init();
@@ -960,6 +957,7 @@ function add_image($id, $data)
 		$result = curl_exec($ch);
 		curl_close($ch);
 	}
+
 }
 
 
