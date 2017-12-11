@@ -14,6 +14,8 @@ define('PATH_ARCHIVE', __DIR__ . '/../archives/');
 
 
 define('PS_WS_AUTH_KEY', 'TMAY3ILMIEYPE3TSF6L8Z6UVMBZ1T5PU');
+define('KEY', 'oneshot');
+
 
 /* FTP */
 $_ftp = array (

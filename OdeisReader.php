@@ -16,7 +16,14 @@ require_once(__DIR__ . '/class/CsvImporter.php');
 require_once(__DIR__ . '/config/config.php');
 
 
-echo "\n\r";
+if ($argc < 2 )
+    exit( "Usage: $argv[0] <KEY>\n" );
+
+if($argv[1] != KEY)
+    exit( "Key: not good\n" );
+
+
+
 
 /* TOUS LES FICHIERS UTILES */
 $files 			= array( 
