@@ -330,9 +330,6 @@ class Simplecsvexport extends Module
 		
 
 
-    	var_dump($params);
-    	die();
-
  		$address 	= new Address($params['cart']->id_address_delivery);
  		$customer 	= new Customer($params['customer']->id);
  		$carrier 	= new Carrier($params['cart']->id_carrier);
