@@ -319,7 +319,8 @@ class Simplecsvexport extends Module
 		}
 	}
 
-	/**
+
+    /**
     * hookActionValidateOrder
     *
     * New orders
@@ -328,8 +329,6 @@ class Simplecsvexport extends Module
     public function hookActionValidateOrder($params)
     {
 		
-
-
  		$address 	= new Address($params['cart']->id_address_delivery);
  		$customer 	= new Customer($params['customer']->id);
  		$carrier 	= new Carrier($params['cart']->id_carrier);
@@ -398,11 +397,17 @@ class Simplecsvexport extends Module
 		foreach ($params['order']->product_list as $row)
 		{
 		
+			if(isset($row['attributes']))
+				$attributes = $row['attributes'];
+			else
+				$attributes = '';
+
+
 			$_dcommandes = array(
 				$params['order']->reference,		//1  Numero de command
 				'?', 								//2  Code famille JSHOP
 				$row['reference'], 					//3  Référence JSHOP l’article
-				$row['attributes'],					//4	 Taille de l’article
+				$attributes,						//4	 Taille de l’article
 				$row['cart_quantity'],				//5  Quantité commandée
 				$row['price'],						//6  Prix de vente TTC
 				'?',								//7  Gravure
@@ -418,7 +423,7 @@ class Simplecsvexport extends Module
 			$allCombinations = $product->getAttributeCombinations(1, false);
 
 			//Si le produit a un attribut
-			if($row['id_product_attribute']) {
+			if(isset($row['id_product_attribute'])) {
 				foreach ($allCombinations as $key => $value) {
 					
 					//Si le produit n'a pas déjà été decrementé
