@@ -330,19 +330,13 @@ class Simplecsvexport extends Module
 		
 
 
+    	var_dump($params);
+    	die();
+
  		$address 	= new Address($params['cart']->id_address_delivery);
  		$customer 	= new Customer($params['customer']->id);
  		$carrier 	= new Carrier($params['cart']->id_carrier);
  		$order 		= new Order($params['order']->id_carrier);
-
-
-/*
-		var_dump($address);
- 		var_dump($customer);
- 		var_dump($carrier);
- 		var_dump($order);
-*/
-
  
 
 		$_ecommandes = array(
@@ -385,9 +379,6 @@ class Simplecsvexport extends Module
 
 
 
-
-
-
 		$time = date('Y-m-d_H-i-s');
 		$efilename = 'ecommandes_'.$time.'.txt';
 		$dfilename = 'dcommandes_'.$time.'.txt';
@@ -414,7 +405,7 @@ class Simplecsvexport extends Module
 				$params['order']->reference,		//1  Numero de command
 				'?', 								//2  Code famille JSHOP
 				$row['reference'], 					//3  Référence JSHOP l’article
-				'?',								//4	 Taille de l’article
+				$row['attributes'],					//4	 Taille de l’article
 				$row['cart_quantity'],				//5  Quantité commandée
 				$row['price'],						//6  Prix de vente TTC
 				'?',								//7  Gravure
@@ -426,37 +417,24 @@ class Simplecsvexport extends Module
 			);
 
 			
-		
-			
-			//number format
-			
-			/*foreach (array('0','1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16') as $field)
-				var_dump($field);
-				var_dump($row);
-			*/
-			//$row[$field] = str_replace('.', ',', $row[$field]);
+			$product = new Product( (int) $row["id_product"] );
+			$allCombinations = $product->getAttributeCombinations(1, false);
 
-			//phone format
-			//foreach (array('invoice_phone', 'invoice_phone_mobile', 'delivery_phone', 'delivery_phone_mobile') as $field)
-			//	$row[$field] = preg_replace('[^0-9]', '', $row[$field]).' ';
-			
-	
-			//csv header
-			/*if (!$csv_header_sent) 
-			{
-				$csv_header_sent = fputcsv($stdout, array_keys($row), ';', '"');
+			//Si le produit a un attribut
+			if($row['id_product_attribute']) {
+				foreach ($allCombinations as $key => $value) {
+					
+					//Si le produit n'a pas déjà été decrementé
+					if($row['id_product_attribute'] != $value['id_product_attribute'])
+						StockAvailable::updateQuantity($value['id_product'], $value['id_product_attribute'], -(int) $row['cart_quantity'], $params['order']->id_shop);
+				}
 			}
-			*/
-			//write line
-		
 
+			//
 			@fputcsv($_Dfilename, $_dcommandes, chr(9), '"');
 		}
 		fclose($_Dfilename);
 
-
-
-		die();
     }
 
 }
