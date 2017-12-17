@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
         <module>
-            <name>ccas_exportorder</name>
-            <displayName><![CDATA[CCAS export Order]]></displayName>
-            <version><![CDATA[1.0.0]]></version>
+            <name>odeis_stock</name>
+            <displayName><![CDATA[stock]]></displayName>
+            <version><![CDATA[1.0.1]]></version>
             <description><![CDATA[This module will generate export order files]]></description>
             <author><![CDATA[Neonix]]></author>
             <is_configurable>0</is_configurable>
